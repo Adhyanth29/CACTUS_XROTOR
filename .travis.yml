@@ -1,0 +1,33 @@
+language: c
+
+jobs:
+  include:
+    - os: linux
+      dist: bionic
+    - os: osx
+      osx_image: xcode10.2  # nasty hack to get Python 3 (see https://blog.travis-ci.com/2019-08-07-extensive-python-testing-on-travis-ci)
+
+addons:
+  apt:
+    - gfortran
+    - libblas-dev
+    - libopenblas-dev
+  homebrew:
+    casks:
+      - gfortran
+    packages:
+      - openblas
+      - lapack
+
+install:
+  - sudo pip install pytest
+  
+script:
+  - mkdir -p build
+  - cd build
+  - cmake -DOPENMP=OFF ../ 
+  - make
+  - cd ..
+  - bin/cactus
+  - cd test/RegTest
+  - PATH=$PATH:../../bin/ pytest runreg.py
